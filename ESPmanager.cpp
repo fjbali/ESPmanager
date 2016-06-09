@@ -14,6 +14,30 @@ extern "C" {
 #include "user_interface.h"
 }
 
+// Stringifying the BUILD_TAG parameter
+#define TEXTIFY(A) #A
+#define ESCAPEQUOTE(A) TEXTIFY(A)
+
+// //String buildTag = ESCAPEQUOTE(BUILD_TAG);
+// String commitTag = ESCAPEQUOTE(TRAVIS_COMMIT);
+
+#ifndef BUILD_TAG
+#define BUILD_TAG "Not Set"
+#endif
+#ifndef COMMIT_TAG
+#define COMMIT_TAG "Not Set"
+#endif
+#ifndef BRANCH_TAG
+#define BRANCH_TAG "Not Set"
+#endif
+#ifndef SLUG_TAG
+#define SLUG_TAG "Not Set"
+#endif
+
+const char * buildTag = ESCAPEQUOTE(BUILD_TAG);
+const char * commitTag = ESCAPEQUOTE(COMMIT_TAG);
+const char * branchTag = ESCAPEQUOTE(BRANCH_TAG);
+const char * slugTag = ESCAPEQUOTE(SLUG_TAG);
 
 ESPmanager::ESPmanager(
     AsyncWebServer & HTTP, FS & fs, const char* host, const char* ssid, const char* pass)
@@ -99,6 +123,12 @@ void  ESPmanager::begin()
 {
 
     ESPMan_Debugln("Settings Manager V" ESPMANVERSION);
+    ESPMan_Debugf("REPO: %s\n",  slugTag );
+    ESPMan_Debugf("BRANCH: %s\n",  branchTag );
+    ESPMan_Debugf("BuildTag: %s\n",  buildTag );
+    ESPMan_Debugf("commitTag: %s\n",  commitTag ) ;
+
+
 
     wifi_set_sleep_type(NONE_SLEEP_T); // workaround no modem sleep.
 
@@ -111,7 +141,8 @@ void  ESPmanager::begin()
     if (_fs.begin()) {
         ESPMan_Debugln(F("File System mounted sucessfully"));
 
-#ifdef DEBUG_ESP_PORT && ESPMan_Debug
+#ifdef DEBUG_ESP_PORT
+#ifdef ESPMan_Debug
         DEBUG_ESP_PORT.println("SPIFFS FILES:");
         {
             Dir dir = SPIFFS.openDir("/");
@@ -122,6 +153,7 @@ void  ESPmanager::begin()
             }
             DEBUG_ESP_PORT.printf("\n");
         }
+#endif
 #endif
 
 //       _NewFilesCheck();
@@ -1009,7 +1041,11 @@ void ESPmanager::upgrade(String path)
     int files_recieved = 0;
     int file_count = 0;
     DynamicJsonBuffer jsonBuffer;
-    String rooturi = String();
+
+    String rooturi = path.substring(0, path.lastIndexOf('/') );
+
+    ESPMan_Debugf("[ESPmanager::upgrade] rooturi=%s\n", rooturi.c_str());
+
 
     JsonObject * p_root = nullptr;
     uint8_t * buff = nullptr;
@@ -1039,16 +1075,24 @@ void ESPmanager::upgrade(String path)
         }
 
 
-        if (root.containsKey("rooturi")) {
-            ESPMan_Debugf("[ESPmanager::_HandleSketchUpdate] Using root uri : %s\n" , rooturi.c_str());
-            rooturi = String(root["rooturi"].asString());
-        }
+        // if (root.containsKey("rooturi")) {
+        //     ESPMan_Debugf("[ESPmanager::_HandleSketchUpdate] Using root uri : %s\n" , rooturi.c_str());
+        //     rooturi = String(root["rooturi"].asString());
+        // }
 
 
         for (JsonArray::iterator it = array.begin(); it != array.end(); ++it) {
             file_count++;
             JsonObject& item = *it;
-            String remote_path = rooturi + String(item["location"].asString());
+            String remote_path = String();
+
+            //  if the is url is set to true then don't prepend the rootUri...
+            if (item["isurl"] == true) {
+                remote_path = String(item["location"].asString());
+            } else {
+                remote_path = rooturi + String(item["location"].asString());
+            }
+
             const char* md5 = item["md5"];
             String filename = item["saveto"];
 
@@ -1087,30 +1131,38 @@ void ESPmanager::upgrade(String path)
                 JsonObject& item = *it;
                 String remote_path = rooturi + String(item["location"].asString());
                 String filename = item["saveto"];
+                String commit = root["commit"];
+
+
 
                 if (remote_path.endsWith("bin") && filename == "sketch" ) {
+                    if (commit != String(commitTag)) {
 
-                    ESPMan_Debugf("START SKETCH DOWNLOAD (%s)\n", remote_path.c_str()  );
+                        ESPMan_Debugf("START SKETCH DOWNLOAD (%s)\n", remote_path.c_str()  );
 
-                    t_httpUpdate_return ret = ESPhttpUpdate.update(remote_path);
+                        t_httpUpdate_return ret = ESPhttpUpdate.update(remote_path);
 
-                    switch (ret) {
-                    case HTTP_UPDATE_FAILED:
-                        ESPMan_Debugf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-                        break;
+                        switch (ret) {
+                        case HTTP_UPDATE_FAILED:
+                            ESPMan_Debugf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+                            break;
 
-                    case HTTP_UPDATE_NO_UPDATES:
-                        ESPMan_Debugf("HTTP_UPDATE_NO_UPDATES");
-                        break;
+                        case HTTP_UPDATE_NO_UPDATES:
+                            ESPMan_Debugf("HTTP_UPDATE_NO_UPDATES");
+                            break;
 
-                    case HTTP_UPDATE_OK:
-                        ESPMan_Debugf("HTTP_UPDATE_OK");
-                        ESP.restart();
+                        case HTTP_UPDATE_OK:
+                            ESPMan_Debugf("HTTP_UPDATE_OK");
+                            ESP.restart();
 
-                        break;
+                            break;
+                        }
+
+                        return ; // shouldn't get here...
+                    } else {
+                        ESPMan_Debugf("SKETCH HAS SAME COMMIT (%s)\n", commitTag  );
+
                     }
-
-                    return ; // shouldn't get here...
                 }
             }
         }
@@ -1619,7 +1671,8 @@ void  ESPmanager::_HandleDataRequest(AsyncWebServerRequest *request)
 
     String buf;
 
-#ifdef DEBUG_ESP_PORT && ESPMan_Debug
+#ifdef DEBUG_ESP_PORT
+#ifdef ESPMan_Debug
 
 //List all collected headers
     int params = request->params();
@@ -1628,6 +1681,7 @@ void  ESPmanager::_HandleDataRequest(AsyncWebServerRequest *request)
         AsyncWebParameter* h = request->getParam(i);
         DEBUG_ESP_PORT.printf("[ESPmanager::_HandleDataRequest] [%s]: %s\n", h->name().c_str(), h->value().c_str());
     }
+#endif
 #endif
 
     /*------------------------------------------------------------------------------------------------------------------

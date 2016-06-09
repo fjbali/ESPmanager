@@ -44,7 +44,7 @@ To Upload
 #include <ESPAsyncWebServer.h>
 
 #include <ESP8266HTTPClient.h>
-#include <ESP8266HTTPUpdate.h>
+#include <ESP8266httpUpdate.h>
 
 #include <FS.h>
 #include <functional>
@@ -58,7 +58,8 @@ To Upload
 #define USE_WEB_UPDATER 
 
 
-//#define Debug_ESPManager
+
+#define Debug_ESPManager
 
 #if defined(DEBUG_ESP_PORT) && defined(Debug_ESPManager)
 	#define ESPMan_Debug(x)    DEBUG_ESP_PORT.print(x)
