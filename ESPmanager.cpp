@@ -914,6 +914,7 @@ bool  ESPmanager::_DownloadToSPIFFS(const char * url , const char * filename, co
 
         Fcheck.close();
 
+
     }
 
 
@@ -968,6 +969,11 @@ bool  ESPmanager::_DownloadToSPIFFS(const char * url , const char * filename, co
 
                         f.close();
                         if (success) {
+
+                            if (_fs.exists(filename)) {
+                                _fs.remove(filename); 
+                            }
+
                             _fs.rename("/tempfile", filename);
                             return true;
                         } else {
