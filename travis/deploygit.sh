@@ -18,7 +18,7 @@ eval `ssh-agent -s`
 # rm ~/.ssh/id_rsa
 cp /tmp/travis.key ~/.ssh/id_rsa
 ssh-add ~/.ssh/id_rsa  
-ssh -vT git@github.com
+#ssh -vT git@github.com
 
 git push -v
 # $SSH_REPO $TARGET_BRANCH
