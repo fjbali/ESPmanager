@@ -3,8 +3,6 @@ set -e # Exit with nonzero exit code if anything fails
 
 
 echo "script started"
-openssl aes-256-cbc -K $encrypted_5d8775c46482_key -iv $encrypted_5d8775c46482_iv -in travis.enc -out /tmp/travis.key -d
-chmod 600 /tmp/travis.key
 mkdir /tmp/package
 cp "/tmp/build/.pioenvs/nodemcu/firmware.bin" "/tmp/package/"
 cp -r "examples/ESPmanager-example/data" "/tmp/package/"
