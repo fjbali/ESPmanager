@@ -21,20 +21,6 @@ echo "DEPLOY HOME"
 ssh -v -p 4022  -i /tmp/travis.key $HOME_USER@$HOME_IP "mkdir -p ~/projects/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH/$1/"
 scp -v -P 4022  -i /tmp/travis.key -rp /tmp/package/. "$HOME_USER@$HOME_IP:~/projects/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH/$1/"  
 
-echo "DEPLOY TO GIT"
 
-SHA=`git rev-parse --verify HEAD`
-cd /tmp/sticilface
-mkdir -p projects/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH/$1
-cp -r /tmp/package/. projects/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH/$1/
-git config user.name "Travis CI"
-git config user.email "$COMMIT_AUTHOR_EMAIL"
-git add .
-git commit -m "Deploy to GitHub Pages: ${SHA}"
-eval `ssh-agent -s`
-ssh-add /tmp/travis.key  
-
-git push -v
-# $SSH_REPO $TARGET_BRANCH
 
 
