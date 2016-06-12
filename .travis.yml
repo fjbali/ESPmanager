@@ -50,3 +50,7 @@ before_install:
 after_success: 
   - chmod a+x ./travis/deploygit.sh
   - ./travis/deploygit.sh
+  - mkdir /tmp/package
+  - cp "/tmp/build/.pioenvs/nodemcu/firmware.bin" "/tmp/package/"
+  - cp -r "examples/ESPmanager-example/data" "/tmp/package/"
+  - ls /tmp/package/

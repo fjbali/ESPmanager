@@ -3,10 +3,6 @@ set -e # Exit with nonzero exit code if anything fails
 
 
 echo "script started"
-mkdir /tmp/package
-cp "/tmp/build/.pioenvs/nodemcu/firmware.bin" "/tmp/package/"
-cp -r "examples/ESPmanager-example/data" "/tmp/package/"
-ls /tmp/package/
 
 # generate the manifest
 python $TRAVIS_BUILD_DIR/travis/buildmanifest.py /tmp/package /tmp/package/manifest.json
