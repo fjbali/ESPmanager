@@ -31,8 +31,10 @@ install:
 - git clone --recursive  https://github.com/me-no-dev/ESPAsyncTCP /tmp/ESPAsyncTCP
 - mkdir /tmp/build
 script:
-- platformio ci --build-dir="/tmp/build" --keep-build-dir --lib="." --lib="/tmp/ESPAsyncWebServer"
-  --lib="/tmp/ESPAsyncTCP" --board=nodemcu
+#- platformio ci --build-dir="/tmp/build" --keep-build-dir --lib="." --lib="/tmp/ESPAsyncWebServer"
+#  --lib="/tmp/ESPAsyncTCP" --board=nodemcu
+
+- platformio ci --project-conf=travis/platoformio.conf  
  
 deploy:
 - provider: script

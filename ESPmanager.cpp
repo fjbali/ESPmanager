@@ -1142,6 +1142,8 @@ void ESPmanager::upgrade(String path)
             delay(1);
         }
 
+
+
         if (updatesketch) {
 
             for (JsonArray::iterator it = array.begin(); it != array.end(); ++it) {
@@ -1156,6 +1158,8 @@ void ESPmanager::upgrade(String path)
                     if (commit != String(commitTag)) {
 
                         ESPMan_Debugf("START SKETCH DOWNLOAD (%s)\n", remote_path.c_str()  );
+
+                        SPIFFS.end(); 
 
                         t_httpUpdate_return ret = ESPhttpUpdate.update(remote_path);
 
