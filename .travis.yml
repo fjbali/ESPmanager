@@ -34,7 +34,7 @@ script:
 #- platformio ci --build-dir="/tmp/build" --keep-build-dir --lib="." --lib="/tmp/ESPAsyncWebServer"
 #  --lib="/tmp/ESPAsyncTCP" --board=nodemcu
 
-- platformio ci --project-conf=travis/platoformio.conf  
+- platformio ci --project-conf=$TRAVIS_BUILD_DIR/travis/platformio.conf  
  
 deploy:
 - provider: script
