@@ -28,6 +28,7 @@ install:
 - git clone --recursive -b FileFallbackHandler https://github.com/sticilface/ESPAsyncWebServer
   /tmp/ESPAsyncWebServer
 - git clone --recursive  https://github.com/me-no-dev/ESPAsyncTCP /tmp/ESPAsyncTCP
+- git clone --recursive  https://github.com/sticilface/sticilface.github.io /tmp/sticilface
 - mkdir /tmp/build
 script:
 - platformio ci --project-conf=$TRAVIS_BUILD_DIR/travis/platformio.conf --build-dir="/tmp/build"

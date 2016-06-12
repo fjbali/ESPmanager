@@ -24,7 +24,6 @@ scp -v -P 4022  -i /tmp/travis.key -rp /tmp/package/. "$HOME_USER@$HOME_IP:~/pro
 echo "DEPLOY TO GIT"
 
 SHA=`git rev-parse --verify HEAD`
-git clone --recursive https://github.com/sticilface/sticilface.github.io /tmp/sticilface
 cd /tmp/sticilface
 mkdir -p projects/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH/$1
 cp /tmp/package/. projects/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH/$1/
