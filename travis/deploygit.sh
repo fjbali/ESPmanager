@@ -20,5 +20,5 @@ cp /tmp/travis.key ~/.ssh/id_rsa
 ssh-add ~/.ssh/id_rsa  
 #ssh -vT git@github.com
 
-git push -v
+git push -u origin master
 # $SSH_REPO $TARGET_BRANCH
