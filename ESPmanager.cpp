@@ -347,6 +347,12 @@ bool  ESPmanager::LoadSettings()
         _extractkey(root, "APpass", _APpass);
         _extractkey(root, "APssid", _APssid);
 
+        _extractkey(root, "savedUpdatePath", _savedUpdatePath); 
+
+        if (root.containsKey("updateFreq")) {
+            _updateFreq = root["updateFreq"]; 
+        }
+
         // if (root.containsKey("host")) {
         //     const char* host = root[F("host")];
         //     if (_host) {
@@ -505,6 +511,8 @@ bool  ESPmanager::LoadSettings()
             }
         }
 
+
+
 #ifdef Debug_ESPManager
 #ifdef DEBUG_ESP_PORT
 
@@ -640,6 +648,9 @@ void  ESPmanager::SaveSettings()
     for (uint8_t i = 0; i < 6; i ++) {
         macAParray.add(apmac[i]);
     }
+
+    root["updateFreq"] = _updateFreq; 
+    root["savedUpdatePath"] = _savedUpdatePath; 
 
     // ESPMan_Debugf("IP = %s, GW = %s, SN = %s\n", IP, GW, SN);
     File f = _fs.open(SETTINGS_FILE, "w");
@@ -971,7 +982,7 @@ bool  ESPmanager::_DownloadToSPIFFS(const char * url , const char * filename, co
                         if (success) {
 
                             if (_fs.exists(filename)) {
-                                _fs.remove(filename); 
+                                _fs.remove(filename);
                             }
 
                             _fs.rename("/tempfile", filename);
@@ -1934,8 +1945,27 @@ void  ESPmanager::_HandleDataRequest(AsyncWebServerRequest *request)
         }
 
         /*------------------------------------------------------------------------------------------------------------------
-                                          SSID handles...
+                                          Update handles...
         ------------------------------------------------------------------------------------------------------------------*/
+
+
+        if ( plainCommand == F("UpdateDetails")) {
+
+            DynamicJsonBuffer jsonBuffer;
+            JsonObject& root = jsonBuffer.createObject();
+
+            root["REPO"] =  slugTag;
+            root["BRANCH"] = branchTag;
+            root["COMMIT"] = commitTag;
+            root["updatepath"] = _savedUpdatePath;
+            root["updatefreq"] = _updateFreq;
+            sendJsontoHTTP(root, request);
+            return;
+
+        }
+
+
+
     } //  end of if plain
 
     static int8_t WiFiresult = -1;

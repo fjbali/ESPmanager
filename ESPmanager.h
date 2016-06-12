@@ -206,6 +206,8 @@ private:
 //  Strings.... 
 	const char * _pdeviceid = "deviceid"; 
 
+	char * _savedUpdatePath = nullptr; 
+	uint32_t _updateFreq = 0; 
 
 };
 

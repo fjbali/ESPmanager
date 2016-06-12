@@ -564,6 +564,20 @@ $(document).on("pagecreate", "#appage", function() {
 
 });
 
+/****************************************************
+ *                    AP Page
+ * 
+ ****************************************************/
+$(document).on("pagecreate", "#appage", function() {
+
+    $.post("data.esp" , "UpdateDetails", function(result) {
+
+        
+
+    }); 
+
+
+});
 
 //}); // page init
 
