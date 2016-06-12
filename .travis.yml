@@ -41,8 +41,8 @@ deploy:
   file: /tmp/build/.pioenvs/nodemcu/firmware.bin
   script: /bin/sh travis/deploy.sh latest
 before_install:
-- openssl aes-256-cbc -K $encrypted_5d8775c46482_key -iv $encrypted_5d8775c46482_iv
-  -in travisgit.enc -out /tmp/travisgit.key -d
-- chmod 600 /tmp/travisgit.key
+# - openssl aes-256-cbc -K $encrypted_5d8775c46482_key -iv $encrypted_5d8775c46482_iv
+#   -in travisgit.enc -out /tmp/travisgit.key -d
+# - chmod 600 /tmp/travisgit.key
 - openssl aes-256-cbc -K $encrypted_5d8775c46482_key -iv $encrypted_5d8775c46482_iv -in travis.enc -out /tmp/travis.key -d
 - chmod 600 /tmp/travis.key
