@@ -34,7 +34,7 @@ git config user.name "Travis CI"
 git config user.email "$COMMIT_AUTHOR_EMAIL"
 git add .
 git commit -m "Deploy to GitHub Pages: ${SHA}"
-ssh-add deploy_key ~\/.ssh/travisgit  
+ssh-add deploy_key /tmp/travisgit.key  
 
 git push
 # $SSH_REPO $TARGET_BRANCH
