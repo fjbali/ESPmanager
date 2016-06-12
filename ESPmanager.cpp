@@ -1159,7 +1159,7 @@ void ESPmanager::upgrade(String path)
 
                         ESPMan_Debugf("START SKETCH DOWNLOAD (%s)\n", remote_path.c_str()  );
 
-                        SPIFFS.end(); 
+                       // _fs.end(); 
 
                         t_httpUpdate_return ret = ESPhttpUpdate.update(remote_path);
 
