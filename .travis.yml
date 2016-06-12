@@ -5,12 +5,10 @@ sudo: false
 cache:
   directories:
   - ~/.platformio
-
+addons:
+  ssh_known_hosts: www.amelvin.co.uk:4022
 env:
   matrix:
-  # - PLATFORMIO_CI_SRC=examples/ESPmanager-example PLATFORMIO_BUILD_FLAGS= "-D BUILD_TAG=$TRAVIS_TAG -D TRAVIS_COMMIT=$TRAVIS_COMMIT"
-  # build_flags = !echo ‘-DBUILD_TIMESTAMP=$UNIX_TIME -DBUILD_TAG=’$TRAVIS_TAG“`
-  # build_flags = !echo '-DBUILD_TAG='${TRAVIS_TAG:-"0.0.0"}
   - PLATFORMIO_CI_SRC=examples/ESPmanager-example PLATFORMIO_BUILD_FLAGS="-D DEBUG_ESP_PORT=Serial -D BUILD_TIMESTAMP='$UNIX_TIME'
     -DBUILD_TAG='$TRAVIS_TAG' -DCOMMIT_TAG='$TRAVIS_COMMIT' -DSLUG_TAG='$TRAVIS_REPO_SLUG' -DBRANCH_TAG='$TRAVIS_BRANCH'"
 
@@ -19,14 +17,12 @@ env:
   - secure: qzq1Gv5y7THaap42xu+kft1SpclpkA9+uLECIDXcArT+Qd/vHBe34M40WbJA85/AN8Ry9d+JspOE/mduJTCIbu9HrHTYZzRzqTIfQRGoDsqSHGOgGUXWgQ2iit9psoxrGf89pqAeZ98wpnxAcozfNeqIiN3oO1J+z5cs44tPSPTqY22tK2qUrPNGnEJJ/vQn3S2PHe4gZYGqqOM60PnCWbldC0TTB8ZEAAzdoegoBjAH5rK3qwvlEMghO/E1A4Nh68lxfb1u4KzRit+oVYnSjDXIRM1XSxmfR6Vl45MHWCXwMj2UH9uDMyqg5XcwoBzjE/Xx4/Y+rZ08FfvYbzNWXepoNw1CZKpgN4U20PHN7xO27rJGH4xV2+CbJ+6O6CpMrGJ2g4+Fhf3qg8ALAkdjNdvcrvTDIlMICGq3XVB+UygTxAN/EBNu+j0Rnki8PsjhLIieh5R54H9wQyFDPgjw9bO0JxtmMBEVL156RD14wzsDqW0nhd8kr20Pxvo2HdwV+mt3hMPXvxfrrQEF+n0T2vr1rxDpbA49oA0BStwwcNMVu4BuCGdl2bssGH3zGJpgvTZkyke9MMeaLLNH/tLQgnExjpP0m/x7IIuTlq0KgZiH3+UzMZR2256uafrG066gjzsuKlG/3OHK3VtlSLHE6w6LndSNUtA5FTZWkXOjiiY=
   - secure: SuhwQGRiG42TQwnMzdJ2l4JxRA53p/H+BCV7itaMfESQvCEDTCWo2+bTZ+f/MTbpUnkR2MAynVv4XHsOPvkVxgpgvMlZAXmHEDMkq/3bYbT3vpFV69u5BuXZ1qt5yLIFs4U+KBxajxTrsJVkGhGwuX+FcBf/02lj7dvI+1MYxWio4/exFkwMQblpXzjYquor5nPjpWZNOj4p+13AaoWv0qwSmxl6Wp958l5WYS6DhMdTtEl/lI+IoQGUHlL6IY01S9DCP363fy2UVuHDYR+DK6fxnbG/A++oYz6DmWFtk+ORHnGGXUZty6Qb0zBG9fHYLz/1ApOPjysytaDdgAYFgnn+3u8QRXWiTEf6kVaCfAHyOEll7JDA+nYqs67rKMRjejwOrnLJERZQN+51IU0YRnbFB8/kXvWX3tznfZDbfWAVyOGPaIWXB6J+zkk+ej+TjJyJ2BzaCAFxHgpIKqR4lVuPMoWYr62fGtNwaNp2PaIk40EofP09IMvXa8kK57N47q6iMX8qgbM8AiPgL2SesKVN9hedPtJ57x6iZMR7f8U4PGiiWPA7NPJ1WZHk/B+EUtO5o1fwDyPMNhUeVmCXrcYlH7zakrPdAIq4m7XzKYprveWxLsW6+gELzl9lFltba1YkVU6QUJj/3EnpRKWTIykggnQdeY1QNYJ2w51QaE4=
   - secure: EklQvDoISuwJNf2Z46RUf/nAjK2AkvFVTOYVY7gdYKfpv/Iuc89DDpHc+ZdDhPPC5haXqPR+aECm5TmO170TfvSjgYordjJYkkhcrLDsJn+9Ioap9m7Ot2mN9y6HrLbRm44Wn8LzZSNHi5HsPLas5S8ipNUqm399LKoScM/dXirSjFr33s8vzmS0rn/I491R+k6XK5PXzWbjcuP7yrSlXY2wNOHU0BLjqSEo5rFclI/FHz95dC4SvVUnZGRenvqhQ9VB2DmE0RuzW+h5ERX746wOxGDwTYUfrZLOt3BJrRc2BQicAEq1URUkqFzPxCL9LKazzjtB4rPgArYTc8X6OiajMyvhbL/OMj8Ge71ch0inRKlR75baKTYO8ycmoxh4DpkeGwJDOwbkNvYFcZTowQhDgrfWu+fVqsu6hTkUJc449FNh/j9jyhPoDgKHVjMcla/qE3Zv/SAMLH/8vHsDa5EFsjbF67LXP7bqwQnpeGGEoJfzT461q43TufHaQ0QNGujnQcf5eGCLAbus1hbptK3x2Z83ZFz9JJi78FHsyrsthxBsuHW4gnrOf4rHukz1/xXcX8Ib9lOpeftYbTr3GUEJZmJV4n5rfip+Z2IjlvW5aIYxwhJo3QnXInyd61llAkz1d2h+JKp9OUiMX3m2CnUENjchLCJ/bAS/ROfn/EY=
-
   - MY_NAME="ESPmanager"
   - MY_VERSION="1.0.0"
   - MY_URL="http://sticilface.co.uk"
   - MY_ROOT="root"
   - MY_AUTHOR="sticilface"
-addons:
-  ssh_known_hosts: www.amelvin.co.uk:4022
+
 install:
 - pip install -U platformio
 - platformio lib install 64
@@ -34,8 +30,6 @@ install:
   /tmp/ESPAsyncWebServer
 - git clone --recursive  https://github.com/me-no-dev/ESPAsyncTCP /tmp/ESPAsyncTCP
 - mkdir /tmp/build
-# enable debugging 
-#- export PLATFORMIO_BUILD_FLAGS="-D DEBUG_ESP_PORT=Serial" # Debug to Serial 
 script:
 - platformio ci --build-dir="/tmp/build" --keep-build-dir --lib="." --lib="/tmp/ESPAsyncWebServer"
   --lib="/tmp/ESPAsyncTCP" --board=nodemcu

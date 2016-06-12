@@ -75,6 +75,7 @@ $(function() {
                <a href="#wifipage" data-role="button" class="ui-btn">WiFi - STA</a>
                <a href="#appage" data-role="button" class="ui-btn">WiFi - AP</a>
                <a href="#otapage" data-role="button" class="ui-btn">OTA</a>
+               <a href="#upgradepage" data-role="button" class="ui-btn">Upgrade</a>
                <a href="#aboutpage" data-role="button" class="ui-btn">About</a>
                <a href="#my-header" data-rel="close" class="ui-btn">Close</a>
 
@@ -90,8 +91,6 @@ $(function() {
                <a href="#popupDialogClearWiFi" data-rel="popup" class="ui-btn" data-transition="pop">Clear WiFi</a>
                <a href="#popupDialogDeleteSettings" data-rel="popup" class="ui-btn" data-transition="pop">Delete Settings</a>
                <a href="#popupDialogSPIFFS" data-rel="popup" class="ui-btn" data-transition="pop" >Format SPIFFS</a>
-               <a id="upgradebutton" data-role="button" class="ui-btn">Upgrade</a>
-
                <a href="#my-header" data-rel="close" class="ui-btn">Close</a>
 
 <!--             <label for="removesaftey-1">Disable Checks:</label>
@@ -427,6 +426,37 @@ $(function() {
    </div><!-- /content -->
 
 </div><!-- /page -->
+
+<!-- ***********************************************************************
+
+         Upgrade Page 
+
+*********************************************************************** -->
+
+<div data-role="page" data-close-btn="right" data-dialog="true" id="upgradepage">
+
+   <div data-role="header">
+      <h1>Upgrade Device</h1>
+   </div><!-- /header -->
+
+   <div role="main" class="ui-content">
+         <div id="upgradevars"></div>
+         <form id="APform">
+            <div class="ui-field-contain">
+               <label for="text-UpgradeURL">URL:</label>
+               <input type="text" data-mini="true" name="UpgradeURL" id="text-UpgradeURL" value="">
+            </div>
+            <div class="ui-field-contain">
+               <label for="text-Upgrade-freq">FREQUENCY:</label>
+               <input type="text" data-mini="true" name="UpgradeFREQ" id="text-Upgrade-freq" value="">
+            </div>
+
+         </form>
+
+   </div><!-- /content -->
+
+</div><!-- /page -->
+
 
 
    <!--  PAGE BOUNDARY -->
