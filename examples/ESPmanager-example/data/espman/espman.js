@@ -565,17 +565,44 @@ $(document).on("pagecreate", "#appage", function() {
 });
 
 /****************************************************
- *                    AP Page
+ *                    Upgrade Page
  * 
  ****************************************************/
-$(document).on("pagecreate", "#appage", function() {
+$(document).on("pagecreate", "#upgradepage", function() {
 
     $.post("data.esp" , "UpdateDetails", function(result) {
+        // Repo : <var id="field-repo"></var> <br>
+        // Branch : <var id="field-branch"></var> <br>
+        // Commit : <var id="field-commit"></var> <br>
+        // id="text-UpgradeURL" 
+        // id="text-Upgrade-freq"
+        
+        console.log(result);
+        
+        $("#field-repo").empty().append(result.REPO);
+        $("#field-branch").empty().append(result.BRANCH);
+        $("#field-commit").empty().append(result.COMMIT);
+        $("#text-UpgradeURL").val(result.updatepath);
+        $("#text-Upgrade-freq").val(result.updatefreq);
 
         
 
-    }); 
+    }).success(function() { $("#status").empty().append("Connected").css("color", "green");  })
+        .error(function() {   $("#status").empty().append("Not Connected").css("color", "red");  })
+        .complete(function() {  });
 
+
+  $("#updatesubmitbutton").click(function() { 
+  $.post("data.esp", $(this).closest("form").find('input,select').filter(':visible').serialize(), function(data) {
+                        //console.log("Data Sent");
+                    });
+  });
+  
+  $("#checkforupdatebutton").click(function() { 
+   
+    $.post("data.esp", "PerformUpdate=true"); 
+    
+  });
 
 });
 
@@ -763,6 +790,7 @@ $(document).on("pagecreate", "#appage", function() {
     };
 
 })(jQuery, window, document);
+
 
 
 

@@ -440,8 +440,13 @@ $(function() {
    </div><!-- /header -->
 
    <div role="main" class="ui-content">
-         <div id="upgradevars"></div>
-         <form id="APform">
+         <div> 
+         Repo : <var id="field-repo"></var> <br>
+         Branch : <var id="field-branch"></var> <br>
+         Commit : <var id="field-commit"></var>
+         </div>
+         
+         <form id="upgradeform">
             <div class="ui-field-contain">
                <label for="text-UpgradeURL">URL:</label>
                <input type="text" data-mini="true" name="UpgradeURL" id="text-UpgradeURL" value="">
@@ -450,7 +455,9 @@ $(function() {
                <label for="text-Upgrade-freq">FREQUENCY:</label>
                <input type="text" data-mini="true" name="UpgradeFREQ" id="text-Upgrade-freq" value="">
             </div>
-
+              <a href="#generalpage"  data-role="button" data-theme="a" data-icon="save" data-iconpos="notext" id="updatesubmitbutton" class=" ui-btn ui-corner-all ui-shadow ui-btn-b ui-btn-icon-left ui-icon-check">APPLY</a>
+              <a href="#generalpage"  data-role="button" data-theme="a" data-icon="save" data-iconpos="notext" id="checkforupdatebutton" class=" ui-btn ui-corner-all ui-shadow ui-btn-b ui-btn-icon-left ui-icon-check">CHECK NOW</a>
+         
          </form>
 
    </div><!-- /content -->
