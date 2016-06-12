@@ -22,16 +22,16 @@ extern "C" {
 // String commitTag = ESCAPEQUOTE(TRAVIS_COMMIT);
 
 #ifndef BUILD_TAG
-#define BUILD_TAG "Not Set"
+#define BUILD_TAG Not Set
 #endif
 #ifndef COMMIT_TAG
-#define COMMIT_TAG "Not Set"
+#define COMMIT_TAG Not Set
 #endif
 #ifndef BRANCH_TAG
-#define BRANCH_TAG "Not Set"
+#define BRANCH_TAG Not Set
 #endif
 #ifndef SLUG_TAG
-#define SLUG_TAG "Not Set"
+#define SLUG_TAG Not Set
 #endif
 
 const char * buildTag = ESCAPEQUOTE(BUILD_TAG);
@@ -347,10 +347,10 @@ bool  ESPmanager::LoadSettings()
         _extractkey(root, "APpass", _APpass);
         _extractkey(root, "APssid", _APssid);
 
-        _extractkey(root, "savedUpdatePath", _savedUpdatePath); 
+        _extractkey(root, "savedUpdatePath", _savedUpdatePath);
 
         if (root.containsKey("updateFreq")) {
-            _updateFreq = root["updateFreq"]; 
+            _updateFreq = root["updateFreq"];
         }
 
         // if (root.containsKey("host")) {
@@ -551,6 +551,11 @@ void  ESPmanager::PrintVariables()
     (_OTAenabled) ? ESPMan_Debugln(F("_OTAenabled = true")) : ESPMan_Debugln(F("_OTAenabled = false"));
     (_STAenabled) ? ESPMan_Debugln(F("_STAenabled = true")) : ESPMan_Debugln(F("_STAenabled = false"));
 
+    ESPMan_Debugf("_savedUpdatePath = %s\n", _savedUpdatePath);
+    ESPMan_Debugf("_updateFreq = %u\n", _updateFreq);
+
+
+
 
     if (_IPs) {
         ESPMan_Debug(F("IPs->IP = "));
@@ -649,8 +654,8 @@ void  ESPmanager::SaveSettings()
         macAParray.add(apmac[i]);
     }
 
-    root["updateFreq"] = _updateFreq; 
-    root["savedUpdatePath"] = _savedUpdatePath; 
+    root["updateFreq"] = _updateFreq;
+    root["savedUpdatePath"] = _savedUpdatePath;
 
     // ESPMan_Debugf("IP = %s, GW = %s, SN = %s\n", IP, GW, SN);
     File f = _fs.open(SETTINGS_FILE, "w");
@@ -1159,7 +1164,7 @@ void ESPmanager::upgrade(String path)
 
                         ESPMan_Debugf("START SKETCH DOWNLOAD (%s)\n", remote_path.c_str()  );
 
-                       // _fs.end(); 
+                        // _fs.end();
 
                         t_httpUpdate_return ret = ESPhttpUpdate.update(remote_path);
 
@@ -2566,7 +2571,72 @@ void  ESPmanager::_HandleDataRequest(AsyncWebServerRequest *request)
 
     }
 
-    //_HTTP.setContentLength(2);
+    /*------------------------------------------------------------------------------------------------------------------
+
+                                            New UPGRADE
+    ------------------------------------------------------------------------------------------------------------------*/
+
+    if (request->hasParam("UpgradeURL", true) ) {
+
+
+
+        String newpath = request->getParam("UpgradeURL", true)->value();
+
+        ESPMan_Debugf("[ESPmanager::_HandleDataRequest] UpgradeURL: %s\n", newpath.c_str());
+
+
+        if (newpath.length() > 0) {
+
+            if (_savedUpdatePath) {
+                if (strcmp(_savedUpdatePath, newpath.c_str()) != 0) {
+
+                    free((void*)_savedUpdatePath);
+                    _savedUpdatePath = strdup((const char*)newpath.c_str());
+
+                }
+
+            } else {
+                _savedUpdatePath = strdup((const char*)newpath.c_str());
+            }
+
+
+        }
+        save_flag = true;
+
+    }
+
+    if (request->hasParam("UpgradeFREQ", true) ) {
+
+        int updateFreq = request->getParam("UpgradeFREQ", true)->value().toInt();
+
+        if (updateFreq < 0) {
+            _updateFreq = 0;
+        } else {
+            _updateFreq = updateFreq;
+        }
+
+
+        save_flag = true;
+
+    }
+
+    if (request->hasParam("PerformUpdate", true) ) {
+
+        _syncCallback = [this]() {
+
+            if (_savedUpdatePath) {
+                ESPMan_Debugf("[ESPmanager::_HandleDataRequest] Checking for Updates: %s\n", _savedUpdatePath);
+                upgrade(String(_savedUpdatePath));
+            }
+            return true;
+        };
+
+
+
+    }
+
+
+
     request->send(200, "text", "OK"); // return ok to speed up AJAX stuff
 }
 
