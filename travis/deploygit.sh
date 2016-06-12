@@ -14,7 +14,7 @@ git add .
 git commit -m "Deploy to GitHub Pages: ${SHA}"
 eval `ssh-agent -s`
 #mkdir ~/.ssh
-rm ~/.ssh/id_rsa
+# rm ~/.ssh/id_rsa
 cp /tmp/travis.key ~/.ssh/id_rsa
 ssh-add ~/.ssh/id_rsa  
 
