@@ -1965,7 +1965,10 @@ void  ESPmanager::_HandleDataRequest(AsyncWebServerRequest *request)
 
             root["REPO"] =  slugTag;
             root["BRANCH"] = branchTag;
-            root["COMMIT"] = commitTag;
+            
+            char shortcommit[8] = {0};
+            strncpy(shortcommit, commitTag, 7);
+            root["COMMIT"] = shortcommit;
             root["updatepath"] = _savedUpdatePath;
             root["updatefreq"] = _updateFreq;
             sendJsontoHTTP(root, request);
