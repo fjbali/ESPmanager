@@ -48,9 +48,9 @@ before_install:
 # - openssl aes-256-cbc -K $encrypted_5d8775c46482_key -iv $encrypted_5d8775c46482_iv -in travis.enc -out /tmp/travis.key -d
 # - chmod 600 /tmp/travis.key
 after_success: 
-  - chmod a+x ./travis/deploygit.sh
-  - ./travis/deploygit.sh
   - mkdir /tmp/package
   - cp "/tmp/build/.pioenvs/nodemcu/firmware.bin" "/tmp/package/"
   - cp -r "examples/ESPmanager-example/data" "/tmp/package/"
   - ls /tmp/package/
+  - chmod a+x ./travis/deploygit.sh
+  - ./travis/deploygit.sh
