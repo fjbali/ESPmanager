@@ -9,7 +9,7 @@ mkdir -p projects/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH/$1
 cp -r /tmp/package/. projects/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH/$1/
 git config --global push.default simple
 git config user.name "sticilface"
-git config user.email "$COMMIT_AUTHOR_EMAIL"
+git config user.email "amelvin@gmail.com"
 git remote set-url origin https://github.com/sticilface/sticilface.github.io
 git add .
 git commit -m "Deploy to GitHub Pages: ${SHA}"
