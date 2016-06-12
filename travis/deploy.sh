@@ -32,7 +32,7 @@ git config user.email "$COMMIT_AUTHOR_EMAIL"
 git add .
 git commit -m "Deploy to GitHub Pages: ${SHA}"
 eval `ssh-agent -s`
-ssh-add deploy_key /tmp/travis.key  
+ssh-add /tmp/travis.key  
 
 git push
 # $SSH_REPO $TARGET_BRANCH
