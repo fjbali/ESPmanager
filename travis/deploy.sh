@@ -34,7 +34,7 @@ git commit -m "Deploy to GitHub Pages: ${SHA}"
 eval `ssh-agent -s`
 ssh-add /tmp/travis.key  
 
-git push
+git push -v
 # $SSH_REPO $TARGET_BRANCH
 
 
