@@ -2,7 +2,7 @@
 set -e # Exit with nonzero exit code if anything fails
 
 echo "DEPLOY TO GIT"
-
+git clone --recursive  https://github.com/sticilface/sticilface.github.io /tmp/sticilface
 SHA=`git rev-parse --verify HEAD`
 cd /tmp/sticilface
 mkdir -p projects/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH/$1
