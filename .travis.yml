@@ -6,7 +6,11 @@ cache:
   directories:
   - ~/.platformio
 addons:
-  ssh_known_hosts: www.amelvin.co.uk:4022
+  apt:
+    packages:
+      - tree
+  ssh_known_hosts: 
+    - www.amelvin.co.uk:4022
 env:
   matrix:
   - PLATFORMIO_CI_SRC=examples/ESPmanager-example PLATFORMIO_BUILD_FLAGS="-D DEBUG_ESP_PORT=Serial
@@ -22,9 +26,6 @@ env:
   - MY_URL="http://sticilface.co.uk"
   - MY_ROOT="root"
   - MY_AUTHOR="sticilface"
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y tree
 install:
 - pip install -U platformio
 - platformio lib install 64
