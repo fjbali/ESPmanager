@@ -22,6 +22,9 @@ env:
   - MY_URL="http://sticilface.co.uk"
   - MY_ROOT="root"
   - MY_AUTHOR="sticilface"
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y tree
 install:
 - pip install -U platformio
 - platformio lib install 64
@@ -54,3 +57,5 @@ after_success:
   - ls /tmp/package/
   - chmod a+x ./travis/deploygit.sh
   - ./travis/deploygit.sh
+after_failure:
+  - tree /tmp/build
