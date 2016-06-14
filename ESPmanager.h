@@ -57,7 +57,7 @@ To Upload
 
 #define USE_WEB_UPDATER 
 
-
+#define DEBUG_ESP_PORT Serial
 
 #define Debug_ESPManager
 
