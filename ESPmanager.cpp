@@ -1080,14 +1080,16 @@ void ESPmanager::upgrade(String path)
 
             free((void*)_savedUpdatePath);
             _savedUpdatePath = strdup((const char*)path.c_str());
+            save_flag = true;
 
         }
 
     } else {
         _savedUpdatePath = strdup((const char*)path.c_str());
+        save_flag = true;
+
     }
 
-    save_flag = true;
 
 
     JsonObject * p_root = nullptr;
@@ -2688,17 +2690,17 @@ ESPmanager::version_state ESPmanager::CheckVersion( String current, String check
 
 // uint32_t ESPmanager::trueSketchSize() {
 
-//     uint32_t wrongSize = ESP.getSketchSize(); 
+//     uint32_t wrongSize = ESP.getSketchSize();
 
 
 //     uint8_t buff[16] = {0};
-//     ESP.flashRead(wrongSize, (uint32_t*)buff, 16); 
-//     uint8_t index = 0; 
+//     ESP.flashRead(wrongSize, (uint32_t*)buff, 16);
+//     uint8_t index = 0;
 //     for (index = 0; index < 16; index++) {
 //         if (buff[index] == 255) { break; }
 //     }
 
-//     return (wrongSize + index); 
+//     return (wrongSize + index);
 
 // }
 
@@ -2707,23 +2709,23 @@ ESPmanager::version_state ESPmanager::CheckVersion( String current, String check
 
 // String ESPmanager::getSketchMD5()
 // {
-//     ESPMan_Debugf("[ESPmanager::getSketchMD5()] started\n"); 
+//     ESPMan_Debugf("[ESPmanager::getSketchMD5()] started\n");
 
 //     const int buf_size = 512;
-//     uint32_t offset = 0; 
+//     uint32_t offset = 0;
 //     uint32_t maxLengthLeft = ESP.getSketchSize();
 //     uint8_t * buf = (uint8_t*) malloc(buf_size);
-//     uint8_t remainder = 0; 
+//     uint8_t remainder = 0;
 
-//     ESPMan_Debugf(" [ESPmanager::getSketchMD5()] True sketch size =%u\n", ESP.getSketchSize() ); 
-//    // ESPMan_Debugf(" [ESPmanager::getSketchMD5()] True sketch size =%u\n", trueSketchSize() ); 
+//     ESPMan_Debugf(" [ESPmanager::getSketchMD5()] True sketch size =%u\n", ESP.getSketchSize() );
+//    // ESPMan_Debugf(" [ESPmanager::getSketchMD5()] True sketch size =%u\n", trueSketchSize() );
 
 
 //     // uint8_t r[16];
 //     // ( ESP.flashRead(offset, (uint32_t*)r, 4) );
 
-//     // ESPMan_Debugf(" [ESPmanager::getSketchMD5()] %03u %03u %03u %03u %03u %03u %03u %03u\n", r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7] ); 
-//     // ESPMan_Debugf(" [ESPmanager::getSketchMD5()] %03u %03u %03u %03u %03u %03u %03u %03u\n", r[8],r[9],r[10],r[11],r[12],r[13],r[14],r[15] ); 
+//     // ESPMan_Debugf(" [ESPmanager::getSketchMD5()] %03u %03u %03u %03u %03u %03u %03u %03u\n", r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7] );
+//     // ESPMan_Debugf(" [ESPmanager::getSketchMD5()] %03u %03u %03u %03u %03u %03u %03u %03u\n", r[8],r[9],r[10],r[11],r[12],r[13],r[14],r[15] );
 
 
 
@@ -2734,31 +2736,31 @@ ESPmanager::version_state ESPmanager::CheckVersion( String current, String check
 //     MD5Builder md5;
 //     md5.begin();
 
-//     uint32_t chunks = 0; 
+//     uint32_t chunks = 0;
 
 //     while( maxLengthLeft > 0) {
 
 //         chunks++;
 
-//         size_t readBytes = maxLengthLeft; 
+//         size_t readBytes = maxLengthLeft;
 
 //         if (readBytes > buf_size) {
-//             readBytes = buf_size; 
+//             readBytes = buf_size;
 //         }
 
 //         if (readBytes < 4) {
 //             remainder = readBytes;
-//             readBytes = 4; 
+//             readBytes = 4;
 //         }
 
 //         if ( ESP.flashRead(offset, (uint32_t*)buf, readBytes) ) {
 //             if (!remainder) {
 //             md5.add(buf, readBytes);
 //         } else {
-//             md5.add(buf, remainder); 
+//             md5.add(buf, remainder);
 //         }
 //             offset += readBytes;
-//             maxLengthLeft -= readBytes; 
+//             maxLengthLeft -= readBytes;
 
 //         }
 
@@ -2768,13 +2770,13 @@ ESPmanager::version_state ESPmanager::CheckVersion( String current, String check
 
 //     md5.calculate();
 
-//     ESPMan_Debugf(" [ESPmanager::getSketchMD5()] chunks = %u\n", chunks ); 
+//     ESPMan_Debugf(" [ESPmanager::getSketchMD5()] chunks = %u\n", chunks );
 
-//     ESPMan_Debugf("[ESPmanager::getSketchMD5()] MD5 = %s\n", md5.toString().c_str() ); 
+//     ESPMan_Debugf("[ESPmanager::getSketchMD5()] MD5 = %s\n", md5.toString().c_str() );
 
-//     return md5.toString(); 
+//     return md5.toString();
 
-// } 
+// }
 
 
 
