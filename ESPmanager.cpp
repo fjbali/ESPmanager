@@ -153,7 +153,6 @@ void  ESPmanager::begin()
             }
             DEBUG_ESP_PORT.printf("\n");
         }
-        test build fail
 #endif
 #endif
 
