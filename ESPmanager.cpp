@@ -723,7 +723,7 @@ void  ESPmanager::handle()
     if (_savedUpdatePath && _updateFreq) {
         if (millis() - _updateTimer > _updateFreq * 60000) {
             _updateTimer = millis();
-            ESPMan_Debugf("Performing updatee check\n");
+            ESPMan_Debugf("Performing update check\n");
             upgrade(String(_savedUpdatePath));
         }
     }
@@ -1462,7 +1462,7 @@ bool  ESPmanager::Wifistart()
     uint32_t timeout = millis();
 
 //  Try SDK connect first
-    if (WiFi.SSID().length() > 0 && WiFi.psk().length() > 0 ) {
+    if (WiFi.SSID().length() > 0) {
         ESPMan_Debugf("[ESPmanager::Wifistart]  waiting for SDK auto Connect\n");
         while (status != WL_CONNECTED) {// && status != WL_NO_SSID_AVAIL && status != WL_CONNECT_FAILED) {
             delay(10);
