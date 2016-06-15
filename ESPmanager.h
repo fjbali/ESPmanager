@@ -57,9 +57,9 @@ To Upload
 
 #define USE_WEB_UPDATER 
 
-#define DEBUG_ESP_PORT Serial
+// #define DEBUG_ESP_PORT Serial
 
-#define Debug_ESPManager
+// #define Debug_ESPManager
 
 #if defined(DEBUG_ESP_PORT) && defined(Debug_ESPManager)
 	#define ESPMan_Debug(x)    DEBUG_ESP_PORT.print(x)
@@ -208,6 +208,7 @@ private:
 
 	char * _savedUpdatePath = nullptr; 
 	uint32_t _updateFreq = 0; 
+	uint32_t _updateTimer = 0; 
 
 };
 
