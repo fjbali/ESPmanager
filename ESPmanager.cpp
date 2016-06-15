@@ -721,9 +721,9 @@ void  ESPmanager::handle()
 
     if (_savedUpdatePath && _updateFreq) {
         if (millis() - _updateTimer > _updateFreq * 60000) {
-            _updateTimer = millis(); 
+            _updateTimer = millis();
             ESPMan_Debugf("Performing updatee check\n");
-            upgrade(String(_savedUpdatePath)); 
+            upgrade(String(_savedUpdatePath));
         }
     }
 }
@@ -1078,7 +1078,7 @@ void ESPmanager::upgrade(String path)
         if (strcmp(_savedUpdatePath, path.c_str()) != 0) {
 
             free((void*)_savedUpdatePath);
-            _savedUpdatePath = strdup((const char*)newpath.c_str());
+            _savedUpdatePath = strdup((const char*)path.c_str());
 
         }
 
@@ -1086,149 +1086,144 @@ void ESPmanager::upgrade(String path)
         _savedUpdatePath = strdup((const char*)path.c_str());
     }
 
-
-}
-save_flag = true;
+    save_flag = true;
 
 
-JsonObject * p_root = nullptr;
-uint8_t * buff = nullptr;
-bool updatesketch = false;
+    JsonObject * p_root = nullptr;
+    uint8_t * buff = nullptr;
+    bool updatesketch = false;
 
-if (_parseUpdateJson(buff, jsonBuffer, p_root, path))
-{
+    if (_parseUpdateJson(buff, jsonBuffer, p_root, path)) {
 
-    ESPMan_Debugf("[ESPmanager::_HandleSketchUpdate] _parseUpdateJson success\n");
-    JsonObject & root = *p_root;
-    files_expected = root["filecount"];
-    JsonArray & array = root["files"];
+        ESPMan_Debugf("[ESPmanager::_HandleSketchUpdate] _parseUpdateJson success\n");
+        JsonObject & root = *p_root;
+        files_expected = root["filecount"];
+        JsonArray & array = root["files"];
 
-    if (root.containsKey("formatSPIFFS")) {
-        if (root["formatSPIFFS"] == true) {
-            ESPMan_Debugf("[ESPmanager::_HandleSketchUpdate] Formatting SPIFFS....");
-            _fs.format();
-            ESPMan_Debugf("done\n");
-        }
-    }
-
-    if (root.containsKey("clearWiFi")) {
-        if (root["clearWiFi"] == true) {
-            ESPMan_Debugf("[ESPmanager::_HandleSketchUpdate] Erasing WiFi Config ....");
-            ESP.eraseConfig();
-            ESPMan_Debugf("done\n");
-        }
-    }
-
-
-    // if (root.containsKey("rooturi")) {
-    //     ESPMan_Debugf("[ESPmanager::_HandleSketchUpdate] Using root uri : %s\n" , rooturi.c_str());
-    //     rooturi = String(root["rooturi"].asString());
-    // }
-
-
-    for (JsonArray::iterator it = array.begin(); it != array.end(); ++it) {
-        file_count++;
-        JsonObject& item = *it;
-        String remote_path = String();
-
-        //  if the is url is set to true then don't prepend the rootUri...
-        if (item["isurl"] == true) {
-            remote_path = String(item["location"].asString());
-        } else {
-            remote_path = rooturi + String(item["location"].asString());
+        if (root.containsKey("formatSPIFFS")) {
+            if (root["formatSPIFFS"] == true) {
+                ESPMan_Debugf("[ESPmanager::_HandleSketchUpdate] Formatting SPIFFS....");
+                _fs.format();
+                ESPMan_Debugf("done\n");
+            }
         }
 
-        const char* md5 = item["md5"];
-        String filename = item["saveto"];
-
-        if (remote_path.endsWith("bin") && filename == "sketch" ) {
-            updatesketch = true;
-            files_recieved++; //  add one to keep count in order...
-#if defined(DEBUG_ESP_PORT)
-            DEBUG_ESP_PORT.printf("[%u/%u] BIN Updated pending (%s)\n", file_count, files_expected , remote_path.c_str()  );
-#endif
-            continue;
+        if (root.containsKey("clearWiFi")) {
+            if (root["clearWiFi"] == true) {
+                ESPMan_Debugf("[ESPmanager::_HandleSketchUpdate] Erasing WiFi Config ....");
+                ESP.eraseConfig();
+                ESPMan_Debugf("done\n");
+            }
         }
-#if defined(DEBUG_ESP_PORT)
-        DEBUG_ESP_PORT.printf("[%u/%u] Downloading (%s)..", file_count, files_expected , remote_path.c_str()  );
-#endif
-
-        bool downloaded = _DownloadToSPIFFS(remote_path.c_str(), filename.c_str(), md5 );
-
-#if defined(DEBUG_ESP_PORT)
-
-        if (downloaded) {
-            DEBUG_ESP_PORT.printf("SUCCESS \n", remote_path.c_str()  );
-            //files_recieved++;
-        } else {
-#if !defined(ESPMan_Debug)
-            DEBUG_ESP_PORT.printf("FAILED \n", remote_path.c_str()  );
-#endif
-        }
-#endif
-
-        delay(1);
-    }
 
 
+        // if (root.containsKey("rooturi")) {
+        //     ESPMan_Debugf("[ESPmanager::_HandleSketchUpdate] Using root uri : %s\n" , rooturi.c_str());
+        //     rooturi = String(root["rooturi"].asString());
+        // }
 
-    if (updatesketch) {
 
         for (JsonArray::iterator it = array.begin(); it != array.end(); ++it) {
+            file_count++;
             JsonObject& item = *it;
-            String remote_path = rooturi + String(item["location"].asString());
+            String remote_path = String();
+
+            //  if the is url is set to true then don't prepend the rootUri...
+            if (item["isurl"] == true) {
+                remote_path = String(item["location"].asString());
+            } else {
+                remote_path = rooturi + String(item["location"].asString());
+            }
+
+            const char* md5 = item["md5"];
             String filename = item["saveto"];
-            String commit = root["commit"];
-
-
 
             if (remote_path.endsWith("bin") && filename == "sketch" ) {
-                if (commit != String(commitTag)) {
+                updatesketch = true;
+                files_recieved++; //  add one to keep count in order...
+#if defined(DEBUG_ESP_PORT)
+                DEBUG_ESP_PORT.printf("[%u/%u] BIN Updated pending (%s)\n", file_count, files_expected , remote_path.c_str()  );
+#endif
+                continue;
+            }
+#if defined(DEBUG_ESP_PORT)
+            DEBUG_ESP_PORT.printf("[%u/%u] Downloading (%s)..", file_count, files_expected , remote_path.c_str()  );
+#endif
 
-                    ESPMan_Debugf("START SKETCH DOWNLOAD (%s)\n", remote_path.c_str()  );
+            bool downloaded = _DownloadToSPIFFS(remote_path.c_str(), filename.c_str(), md5 );
 
-                    // _fs.end();
+#if defined(DEBUG_ESP_PORT)
 
-                    t_httpUpdate_return ret = ESPhttpUpdate.update(remote_path);
+            if (downloaded) {
+                DEBUG_ESP_PORT.printf("SUCCESS \n", remote_path.c_str()  );
+                //files_recieved++;
+            } else {
+#if !defined(ESPMan_Debug)
+                DEBUG_ESP_PORT.printf("FAILED \n", remote_path.c_str()  );
+#endif
+            }
+#endif
 
-                    switch (ret) {
-                    case HTTP_UPDATE_FAILED:
-                        ESPMan_Debugf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-                        break;
+            delay(1);
+        }
 
-                    case HTTP_UPDATE_NO_UPDATES:
-                        ESPMan_Debugf("HTTP_UPDATE_NO_UPDATES");
-                        break;
 
-                    case HTTP_UPDATE_OK:
-                        ESPMan_Debugf("HTTP_UPDATE_OK");
-                        ESP.restart();
 
-                        break;
+        if (updatesketch) {
+
+            for (JsonArray::iterator it = array.begin(); it != array.end(); ++it) {
+                JsonObject& item = *it;
+                String remote_path = rooturi + String(item["location"].asString());
+                String filename = item["saveto"];
+                String commit = root["commit"];
+
+
+
+                if (remote_path.endsWith("bin") && filename == "sketch" ) {
+                    if (commit != String(commitTag)) {
+
+                        ESPMan_Debugf("START SKETCH DOWNLOAD (%s)\n", remote_path.c_str()  );
+
+                        // _fs.end();
+
+                        t_httpUpdate_return ret = ESPhttpUpdate.update(remote_path);
+
+                        switch (ret) {
+                        case HTTP_UPDATE_FAILED:
+                            ESPMan_Debugf("HTTP_UPDATE_FAILD Error (%d): %s", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+                            break;
+
+                        case HTTP_UPDATE_NO_UPDATES:
+                            ESPMan_Debugf("HTTP_UPDATE_NO_UPDATES");
+                            break;
+
+                        case HTTP_UPDATE_OK:
+                            ESPMan_Debugf("HTTP_UPDATE_OK");
+                            ESP.restart();
+
+                            break;
+                        }
+
+                        return ; // shouldn't get here...
+                    } else {
+                        ESPMan_Debugf("SKETCH HAS SAME COMMIT (%s)\n", commitTag  );
+
                     }
-
-                    return ; // shouldn't get here...
-                } else {
-                    ESPMan_Debugf("SKETCH HAS SAME COMMIT (%s)\n", commitTag  );
-
                 }
             }
         }
+
+
+
+    } else {
+
+        ESPMan_Debugf("[ESPmanager::_HandleSketchUpdate] _parseUpdateJson FAILED\n");
+
     }
 
-
-
-} else
-{
-
-    ESPMan_Debugf("[ESPmanager::_HandleSketchUpdate] _parseUpdateJson FAILED\n");
-
-}
-
-if (buff)
-{
-    delete[] buff;
-}
+    if (buff) {
+        delete[] buff;
+    }
 
 }
 
