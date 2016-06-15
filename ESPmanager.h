@@ -57,9 +57,9 @@ To Upload
 
 #define USE_WEB_UPDATER 
 
-// #define DEBUG_ESP_PORT Serial
+#define DEBUG_ESP_PORT Serial
 
-// #define Debug_ESPManager
+#define Debug_ESPManager
 
 #if defined(DEBUG_ESP_PORT) && defined(Debug_ESPManager)
 	#define ESPMan_Debug(x)    DEBUG_ESP_PORT.print(x)
@@ -128,7 +128,9 @@ public:
 	enum version_state  { lower = -1, current = 0, higher = 1, failed = 2 };
 	static version_state CheckVersion( String current, String check); 
 
+	// uint32_t trueSketchSize();
 
+	// String getSketchMD5(); 
 
 private:
 

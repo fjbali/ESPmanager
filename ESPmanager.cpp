@@ -8,6 +8,7 @@
 #include <MD5Builder.h>
 #include <AsyncJson.h>
 #include "FileFallbackHandler.h"
+#include <MD5Builder.h>
 
 
 extern "C" {
@@ -127,7 +128,6 @@ void  ESPmanager::begin()
     ESPMan_Debugf("BRANCH: %s\n",  branchTag );
     ESPMan_Debugf("BuildTag: %s\n",  buildTag );
     ESPMan_Debugf("commitTag: %s\n",  commitTag ) ;
-
 
 
     wifi_set_sleep_type(NONE_SLEEP_T); // workaround no modem sleep.
@@ -719,6 +719,7 @@ void  ESPmanager::handle()
         };
     }
 
+
     if (_savedUpdatePath && _updateFreq) {
         if (millis() - _updateTimer > _updateFreq * 60000) {
             _updateTimer = millis();
@@ -1180,7 +1181,7 @@ void ESPmanager::upgrade(String path)
 
 
                 if (remote_path.endsWith("bin") && filename == "sketch" ) {
-                    if (commit != String(commitTag)) {
+                    if ( String( item["md5"].asString() ) != ESP.getSketchMD5() ) {
 
                         ESPMan_Debugf("START SKETCH DOWNLOAD (%s)\n", remote_path.c_str()  );
 
@@ -1206,7 +1207,7 @@ void ESPmanager::upgrade(String path)
 
                         return ; // shouldn't get here...
                     } else {
-                        ESPMan_Debugf("SKETCH HAS SAME COMMIT (%s)\n", commitTag  );
+                        ESPMan_Debugf("BINARY HAS SAME MD5 as current (%s)\n", item["md5"].asString()  );
 
                     }
                 }
@@ -2685,6 +2686,95 @@ ESPmanager::version_state ESPmanager::CheckVersion( String current, String check
 }
 
 
+// uint32_t ESPmanager::trueSketchSize() {
+
+//     uint32_t wrongSize = ESP.getSketchSize(); 
+
+
+//     uint8_t buff[16] = {0};
+//     ESP.flashRead(wrongSize, (uint32_t*)buff, 16); 
+//     uint8_t index = 0; 
+//     for (index = 0; index < 16; index++) {
+//         if (buff[index] == 255) { break; }
+//     }
+
+//     return (wrongSize + index); 
+
+// }
+
+
+
+
+// String ESPmanager::getSketchMD5()
+// {
+//     ESPMan_Debugf("[ESPmanager::getSketchMD5()] started\n"); 
+
+//     const int buf_size = 512;
+//     uint32_t offset = 0; 
+//     uint32_t maxLengthLeft = ESP.getSketchSize();
+//     uint8_t * buf = (uint8_t*) malloc(buf_size);
+//     uint8_t remainder = 0; 
+
+//     ESPMan_Debugf(" [ESPmanager::getSketchMD5()] True sketch size =%u\n", ESP.getSketchSize() ); 
+//    // ESPMan_Debugf(" [ESPmanager::getSketchMD5()] True sketch size =%u\n", trueSketchSize() ); 
+
+
+//     // uint8_t r[16];
+//     // ( ESP.flashRead(offset, (uint32_t*)r, 4) );
+
+//     // ESPMan_Debugf(" [ESPmanager::getSketchMD5()] %03u %03u %03u %03u %03u %03u %03u %03u\n", r[0],r[1],r[2],r[3],r[4],r[5],r[6],r[7] ); 
+//     // ESPMan_Debugf(" [ESPmanager::getSketchMD5()] %03u %03u %03u %03u %03u %03u %03u %03u\n", r[8],r[9],r[10],r[11],r[12],r[13],r[14],r[15] ); 
+
+
+
+//     if(!buf) {
+//         return "MallocFail";
+//     }
+
+//     MD5Builder md5;
+//     md5.begin();
+
+//     uint32_t chunks = 0; 
+
+//     while( maxLengthLeft > 0) {
+
+//         chunks++;
+
+//         size_t readBytes = maxLengthLeft; 
+
+//         if (readBytes > buf_size) {
+//             readBytes = buf_size; 
+//         }
+
+//         if (readBytes < 4) {
+//             remainder = readBytes;
+//             readBytes = 4; 
+//         }
+
+//         if ( ESP.flashRead(offset, (uint32_t*)buf, readBytes) ) {
+//             if (!remainder) {
+//             md5.add(buf, readBytes);
+//         } else {
+//             md5.add(buf, remainder); 
+//         }
+//             offset += readBytes;
+//             maxLengthLeft -= readBytes; 
+
+//         }
+
+//     }
+
+
+
+//     md5.calculate();
+
+//     ESPMan_Debugf(" [ESPmanager::getSketchMD5()] chunks = %u\n", chunks ); 
+
+//     ESPMan_Debugf("[ESPmanager::getSketchMD5()] MD5 = %s\n", md5.toString().c_str() ); 
+
+//     return md5.toString(); 
+
+// } 
 
 
 
