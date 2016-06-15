@@ -5,10 +5,6 @@ sudo: false
 cache:
   directories:
   - ~/.platformio
-addons:
-  apt:
-    packages:
-      - tree
 env:
   matrix:
   - PLATFORMIO_CI_SRC="examples/ESPmanager-example" 
