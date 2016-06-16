@@ -128,9 +128,8 @@ public:
 	enum version_state  { lower = -1, current = 0, higher = 1, failed = 2 };
 	static version_state CheckVersion( String current, String check); 
 
-	// uint32_t trueSketchSize();
-
-	// String getSketchMD5(); 
+	uint32_t trueSketchSize();
+	String getSketchMD5(); 
 
 private:
 

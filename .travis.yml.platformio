@@ -1,0 +1,21 @@
+language: python
+python:
+- '2.7'
+sudo: false
+cache:
+  directories:
+  - ~/.platformio
+env:
+  matrix:
+  - PLATFORMIO_CI_SRC="examples/ESPmanager-example" 
+  - PLATFORMIO_CI_SRC="examples/ESPmanager-example" PLATFORMIO_BUILD_FLAGS="-D Debug_ESPManager -D DEBUG_ESP_PORT=Serial"
+install:
+- pip install -U platformio
+#- git clone https://github.com/esp8266/Arduino.git ./platformio/packages/framework-arduinoespressif
+# - git clone https://github.com/sticilface/arduino-esp8266 ./platformio/packages/framework-arduinoespressif
+- platformio lib install 64
+- git clone --recursive -b FileFallbackHandler https://github.com/sticilface/ESPAsyncWebServer /tmp/ESPAsyncWebServer
+- git clone --recursive  https://github.com/me-no-dev/ESPAsyncTCP /tmp/ESPAsyncTCP
+- mkdir /tmp/build
+script:
+- platformio ci --board="esp12e" --build-dir="/tmp/build" --lib="." --lib="/tmp/ESPAsyncWebServer" --lib="/tmp/ESPAsyncTCP"
