@@ -931,7 +931,7 @@ bool  ESPmanager::_DownloadToSPIFFS(const char * url , const char * filename, co
         String crc = _file_md5(Fcheck);
 
         if (crc == String(md5_true)) {
-            ESPMan_Debugf(" [ERROR] File exists with same CRC \n");
+            ESPMan_Debugf(" [NO CHANGE] File exists with same CRC \n");
             Fcheck.close();
             return false;
         }
@@ -1148,7 +1148,7 @@ void ESPmanager::upgrade(String path)
                 updatesketch = true;
                 files_recieved++; //  add one to keep count in order...
 #if defined(DEBUG_ESP_PORT)
-                DEBUG_ESP_PORT.printf("[%u/%u] BIN Updated pending (%s)\n", file_count, files_expected , filename.c_str()  );
+                DEBUG_ESP_PORT.printf("[%u/%u] BIN Updated pending (%s) ", file_count, files_expected , filename.c_str()  );
 #endif
                 continue;
             }
