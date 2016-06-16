@@ -931,7 +931,7 @@ bool  ESPmanager::_DownloadToSPIFFS(const char * url , const char * filename, co
         String crc = _file_md5(Fcheck);
 
         if (crc == String(md5_true)) {
-            ESPMan_Debugf("\n  [ERROR] File exists with same CRC \n");
+            ESPMan_Debugf(" [ERROR] File exists with same CRC \n");
             Fcheck.close();
             return false;
         }
@@ -947,14 +947,14 @@ bool  ESPmanager::_DownloadToSPIFFS(const char * url , const char * filename, co
     }
 
     if (strlen(filename) > _FSinfo.maxPathLength) {
-        ESPMan_Debugf("\n  [ERROR] file name too long \n");
+        ESPMan_Debugf(" [ERROR] file name too long \n");
         return false;
     }
 
     File f = _fs.open("/tempfile", "w+"); //  w+ is to allow read operations on file.... otherwise crc gets 255!!!!!
 
     if (!f) {
-        ESPMan_Debugf("\n  [ERROR] tempfile open failed\n");
+        ESPMan_Debugf(" [ERROR] tempfile open failed\n");
         return false;
     } else {
 
@@ -1148,12 +1148,12 @@ void ESPmanager::upgrade(String path)
                 updatesketch = true;
                 files_recieved++; //  add one to keep count in order...
 #if defined(DEBUG_ESP_PORT)
-                DEBUG_ESP_PORT.printf("[%u/%u] BIN Updated pending (%s)\n", file_count, files_expected , remote_path.c_str()  );
+                DEBUG_ESP_PORT.printf("[%u/%u] BIN Updated pending (%s)\n", file_count, files_expected , filename.c_str()  );
 #endif
                 continue;
             }
 #if defined(DEBUG_ESP_PORT)
-            DEBUG_ESP_PORT.printf("[%u/%u] Downloading (%s)..", file_count, files_expected , remote_path.c_str()  );
+            DEBUG_ESP_PORT.printf("[%u/%u] Downloading (%s)..", file_count, files_expected , filename.c_str()  );
 #endif
 
             bool downloaded = _DownloadToSPIFFS(remote_path.c_str(), filename.c_str(), md5 );
