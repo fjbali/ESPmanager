@@ -18,7 +18,7 @@ install:
   - platformio platforms install espressif --with-package framework-arduinoespressif
   - rm -rf ~/.platformio/packages/framework-arduinoespressif
   - git clone https://github.com/esp8266/Arduino ~/.platformio/packages/framework-arduinoespressif
-  - export PATH="$HOME/.platformio/packages/toolchain-xtensa/xtensa-lx106-elf/bin:$PATH"
+  - export PATH="$HOME/.platformio/packages/toolchain-xtensa/bin:$PATH"
   - cd $HOME/.platformio/packages/toolchain-xtensa/lib
   - tree $HOME/.platformio/packages/toolchain-xtensa
   - which xtensa-lx106-elf-ar
