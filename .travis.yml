@@ -31,7 +31,7 @@ install:
   # - xtensa-lx106-elf-ar d libstdc++.a new_op.o
   # - xtensa-lx106-elf-ar d libstdc++.a new_opv.o
  # finsih sdk updates 
-  - cd ~
+  - cd $TRAVIS_BUILD_DIR
   - echo "10606" > ~/.platformio/packages/framework-arduinoespressif/version.txt
   - mkdir /tmp/build
   - mkdir $TRAVIS_BUILD_DIR/libs
@@ -41,6 +41,6 @@ install:
 
 script:
   - platformio ci --board="esp12e" --build-dir="/tmp/build" 
-    --lib="." 
+    --lib="$TRAVIS_BUILD_DIR" 
     --lib="$TRAVIS_BUILD_DIR/libs/ESPAsyncTCP" 
     --lib="$TRAVIS_BUILD_DIR/libs/ESPAsyncWebServer"
