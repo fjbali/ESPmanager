@@ -20,8 +20,8 @@ install:
   - git clone https://github.com/esp8266/Arduino ~/.platformio/packages/framework-arduinoespressif
   - export PATH="$HOME/.platformio/packages/toolchain-xtensa/xtensa-lx106-elf/bin:$PATH"
   - cd $HOME/.platformio/packages/toolchain-xtensa/lib
+  - tree $HOME/.platformio/packages
   - which xtensa-lx106-elf-ar
- # - tree ~/.platformio/packages/framework-arduinoespressif/tools
  # update sdk 
   - xtensa-lx106-elf-ar -d libmain.a mem_manager.o
   - xtensa-lx106-elf-ar d libstdc++.a pure.o
