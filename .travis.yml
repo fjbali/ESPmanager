@@ -14,6 +14,20 @@ install:
   - platformio platforms install espressif --with-package framework-arduinoespressif
   - rm -rf ~/.platformio/packages/framework-arduinoespressif
   - git clone https://github.com/esp8266/Arduino ~/.platformio/packages/framework-arduinoespressif
+  - export PATH="~/.platformio/packages/framework-arduinoespressif/tools/xtensa-lx106-elf/bin:$PATH"
+  - cd ~/.platformio/packages/framework-arduinoespressif/tools/sdk/lib
+ # update sdk 
+  - xtensa-lx106-elf-ar -d libmain.a mem_manager.o
+  - xtensa-lx106-elf-ar d libstdc++.a pure.o
+  - xtensa-lx106-elf-ar d libstdc++.a vterminate.o
+  - xtensa-lx106-elf-ar d libstdc++.a guard.o
+  - xtensa-lx106-elf-ar d libstdc++.a functexcept.o
+  - xtensa-lx106-elf-ar d libstdc++.a del_op.o
+  - xtensa-lx106-elf-ar d libstdc++.a del_opv.o
+  - xtensa-lx106-elf-ar d libstdc++.a new_op.o
+  - xtensa-lx106-elf-ar d libstdc++.a new_opv.o
+ # finsih sdk updates 
+  - cd ~
   - echo "10606" > ~/.platformio/packages/framework-arduinoespressif/version.txt
   - mkdir /tmp/build
   - mkdir $TRAVIS_BUILD_DIR/libs
