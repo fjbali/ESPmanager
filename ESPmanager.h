@@ -18,10 +18,10 @@ ToDo
 9)
 
 
-NEW TODO... 
+NEW TODO...
 
-3)  change download serial output to work without Debug_ESPManager, if debug output is enambled. 
-4)  Some form of versioning output / control.... 
+3)  change download serial output to work without Debug_ESPManager, if debug output is enambled.
+4)  Some form of versioning output / control....
 
 
 To Upload
@@ -36,7 +36,7 @@ To Upload
 
 #pragma once
 
-#include "Arduino.h"
+#include <Arduino.h>
 #include <ESP8266WiFi.h>
 
 
@@ -55,11 +55,11 @@ To Upload
 #define ESPMANVERSION "1.2-async"
 
 
-#define USE_WEB_UPDATER 
+#define USE_WEB_UPDATER
 
-#define DEBUG_ESP_PORT Serial
+//#define DEBUG_ESP_PORT Serial
 
-#define Debug_ESPManager
+// #define Debug_ESPManager
 
 #if defined(DEBUG_ESP_PORT) && defined(Debug_ESPManager)
 	#define ESPMan_Debug(x)    DEBUG_ESP_PORT.print(x)
@@ -112,7 +112,7 @@ public:
 	void handle();
 
 	const char * deviceName() { return _host; }
-	
+
 	static String formatBytes(size_t bytes);
 	static bool StringtoMAC(uint8_t *mac, const String &input);
 	static void urldecode(char *dst, const char *src); // need to check it works to decode the %03... for :
@@ -124,12 +124,12 @@ public:
 
 	static String _file_md5 (File& f);
 
-	void upgrade(String path); 
+	void upgrade(String path);
 	enum version_state  { lower = -1, current = 0, higher = 1, failed = 2 };
-	static version_state CheckVersion( String current, String check); 
+	static version_state CheckVersion( String current, String check);
 
 	uint32_t trueSketchSize();
-	String getSketchMD5(); 
+	String getSketchMD5();
 
 private:
 
@@ -144,19 +144,19 @@ private:
 
 #ifdef USE_WEB_UPDATER
 	bool _DownloadToSPIFFS(const char * url , const char * path, const char * md5 = nullptr);
-	bool _upgrade();
-	//bool _upgradewrapper(uint8_t * buff); 
+	//bool _upgrade();
+	//bool _upgradewrapper(uint8_t * buff);
 
 	//  new functions to handle updates of individual spiffs files and sketch...
-	bool _parseUpdateJson(uint8_t *& buff, DynamicJsonBuffer & jsonBuffer, JsonObject *& root, String path); 
+	bool _parseUpdateJson(uint8_t *& buff, DynamicJsonBuffer & jsonBuffer, JsonObject *& root, String path);
 	void _HandleSketchUpdate(AsyncWebServerRequest *request);
 #endif
 
-	void _extractkey(JsonObject & root, const char * name, char *& ptr ); 
+	void _extractkey(JsonObject & root, const char * name, char *& ptr );
 	//void _NewFilesCheck();
 	void handleFileUpload();  // Thank to Me-No-Dev and the FSBrowser for this function .
 
-//	void _WiFiEventCallback(WiFiEvent_t event); 
+//	void _WiFiEventCallback(WiFiEvent_t event);
 
 	const char * C_null = "";
 
@@ -170,7 +170,7 @@ private:
 	char * _APpass = nullptr;
 	char * _APssid = nullptr;
 	char * _OTApassword = nullptr;
-	
+
 	uint8_t * _STAmac = nullptr;
 	uint8_t * _APmac = nullptr;
 
@@ -178,12 +178,13 @@ private:
 	FS & _fs;
 	AsyncWebServer & _HTTP;
 	//ESP8266HTTPUpdateServer httpUpdater;
-	HTTPClient* httpclient{nullptr}; 
+	HTTPClient* httpclient{nullptr};
 
 	uint8_t _APchannel{1};
 	bool _APhidden{false};
 	bool _APenabled{false};
-	bool _STAenabled{true}; 
+	bool _AP_is_enabled{false};
+	bool _STAenabled{true};
 	bool _OTAenabled{true};
 	bool save_flag{false};
 	bool _DHCP{true};
@@ -192,9 +193,9 @@ private:
 	uint8_t _APrestartmode{2};   // 1 = none, 2 = 5min, 3 = 10min, 4 = whenever : 0 is reserved for unset...
 	uint32_t _APtimer{0};
 	int _wifinetworksfound{0};
-	//AsyncWebServerRequest * _wifiRequestHandler{nullptr}; 
+	//AsyncWebServerRequest * _wifiRequestHandler{nullptr};
 
-	std::function<bool(void)> _syncCallback{nullptr}; 
+	std::function<bool(void)> _syncCallback{nullptr};
 
 	struct IPconfigs_t {
 		IPAddress IP;
@@ -204,12 +205,12 @@ private:
 
 	IPconfigs_t * _IPs = NULL; // will hold IPs if they are set by the user..
 
-//  Strings.... 
-	const char * _pdeviceid = "deviceid"; 
+//  Strings....
+	const char * _pdeviceid = "deviceid";
 
-	char * _savedUpdatePath = nullptr; 
-	uint32_t _updateFreq = 0; 
-	uint32_t _updateTimer = 0; 
+	char * _savedUpdatePath = nullptr;
+	uint32_t _updateFreq = 0;
+	uint32_t _updateTimer = 0;
 
 };
 
@@ -234,6 +235,3 @@ upgrade template
 
 
 */
-
-
-

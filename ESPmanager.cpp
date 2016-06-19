@@ -136,7 +136,6 @@ void  ESPmanager::begin()
 
     //uint32_t value = WiFi.onEvent( std::bind( &ESPmanager::_WiFiEventCallback, this, _1 ) );
 
-
     //WiFi.removeEvent( value );
 
 
@@ -256,13 +255,20 @@ void  ESPmanager::begin()
 
     _HTTP.on("/espman/data.esp", std::bind(&ESPmanager::_HandleDataRequest, this, _1 ));
     //_HTTP.on("/espman/upload", HTTP_POST , [this]() { _HTTP.send(200, "text/plain", ""); }, std::bind(&ESPmanager::handleFileUpload, this)  );
+
+// easy tiger
+    // _HTTP.redirect("/jquery/jqm1.4.5.css", "http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" ,  WiFi.softAPIP() );
+    // _HTTP.redirect("/jquery/jq1.11.1.js", "http://code.jquery.com/jquery-1.11.1.min.js", WiFi.softAPIP() );
+    // _HTTP.redirect("/jquery/jqm1.4.5.js", "http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js", WiFi.softAPIP() );
+
+
     _HTTP.serveStatic("/espman", _fs, "/espman", "max-age=86400");
+    _HTTP.serveStatic("/jquery", _fs, "/jquery", "max-age=86400");
 
-//   _HTTP.serveStatic("/jquery", _fs, "/jquery", "max-age=86400");
-
-    _HTTP.addHandler( new FileFallbackHandler(_fs, "/jquery/jqm1.4.5.css", "/jquery/jqm1.4.5.css", "http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css",  "max-age=86400"));
-    _HTTP.addHandler( new FileFallbackHandler(_fs, "/jquery/jq1.11.1.js" , "/jquery/jq1.11.1.js" ,   "http://code.jquery.com/jquery-1.11.1.min.js",  "max-age=86400"));
-    _HTTP.addHandler( new FileFallbackHandler(_fs, "/jquery/jqm1.4.5.js" , "/jquery/jqm1.4.5.js" ,   "http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js",  "max-age=86400"));
+    //   server.redirect(“url”, “location”, exclude-ip)
+    // _HTTP.addHandler( new FileFallbackHandler(_fs, "/jquery/jqm1.4.5.css", "/jquery/jqm1.4.5.css", "http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css",  "max-age=86400"));
+    // _HTTP.addHandler( new FileFallbackHandler(_fs, "/jquery/jq1.11.1.js" , "/jquery/jq1.11.1.js" ,   "http://code.jquery.com/jquery-1.11.1.min.js",  "max-age=86400"));
+    // _HTTP.addHandler( new FileFallbackHandler(_fs, "/jquery/jqm1.4.5.js" , "/jquery/jqm1.4.5.js" ,   "http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js",  "max-age=86400"));
 
 
     _HTTP.on("/espman/update", std::bind(&ESPmanager::_HandleSketchUpdate, this, _1 ));
@@ -685,14 +691,15 @@ void  ESPmanager::handle()
     }
 
 
-    if (_APtimer > 0) {
+    if (_AP_is_enabled && _APtimer > 0) {
         uint32_t timer = 0;
-        _APtimer = 0;
         if (_APrestartmode == 2) { timer = 5 * 60 * 1000; }
         if (_APrestartmode == 3) { timer = 10 * 60 * 1000; }
         if (millis() - _APtimer > timer) {
             WiFi.mode(WIFI_STA); //  == WIFI_AP
             ESPMan_Debugln("AP Stopped");
+            _AP_is_enabled = false;
+            _APtimer = 0;
         }
     }
 
@@ -813,6 +820,7 @@ void  ESPmanager::InitialiseFeatures()
         else if (error == OTA_END_ERROR) { DEBUG_ESP_PORT.println(F("End Failed")); }
     });
 #endif
+
     ArduinoOTA.begin();
 
 
@@ -826,96 +834,96 @@ void  ESPmanager::InitialiseFeatures()
 #ifdef USE_WEB_UPDATER
 
 
-bool  ESPmanager::_upgrade()
-{
-    return false; // disable for now....
-
-    static const uint16_t httpPort = 80;
-    static const size_t bufsize = 1024;
-//  get files list into json
-    uint8_t files_recieved = 0;
-    uint8_t files_expected = 0;
-
-    HTTPClient http;
-    String path = String(__updateserver) + String(__updatepath);
-    http.begin(path); //HTTP
-
-    int httpCode = http.GET();
-
-    if (httpCode) {
-        if (httpCode == 200) {
-
-            size_t len = http.getSize();
-            if (len > bufsize) {
-                ESPMan_Debugln("Receive update length too big.  Increase buffer");
-                return false;
-            }
-            uint8_t buff[bufsize] = { 0 }; // max size of input buffer. Don't use String, as arduinoJSON doesn't like it!
-
-            // get tcp stream
-            WiFiClient * stream = http.getStreamPtr();
-
-            // read all data from server
-            while (http.connected() && (len > 0 || len == -1)) {
-                // get available data size
-                size_t size = stream->available();
-
-                if (size) {
-                    int c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
-                    if (len > 0) {
-                        len -= c;
-                    }
-                }
-                delay(1);
-            }
-            http.end();
-            yield();
-
-            DynamicJsonBuffer jsonBuffer;
-            JsonArray& root = jsonBuffer.parseArray( (char*)buff );
-
-            if (!root.success()) {
-                ESPMan_Debugln("Parse JSON failed");
-                return false;
-            } else {
-                uint8_t count = 0;
-                for (JsonArray::iterator it = root.begin(); it != root.end(); ++it) {
-                    files_expected++;
-                    JsonObject& item = *it;
-                    const char* value = item["file"];
-                    const char* md5 = item["md5"];
-                    ESPMan_Debugf("[%u] ", files_expected);
-                    String fullpathtodownload = String(__updateserver) + String(value);
-                    String filename = fullpathtodownload.substring( fullpathtodownload.lastIndexOf("/"), fullpathtodownload.length() );
-                    bool downloaded = _DownloadToSPIFFS(fullpathtodownload.c_str() , filename.c_str(), md5 );
-                    if (downloaded) {
-                        ESPMan_Debugf("Download SUCCESS (%s)\n", fullpathtodownload.c_str()  );
-                        files_recieved++;
-                    } else {
-                        ESPMan_Debugf("Download FAILED (%s)\n", fullpathtodownload.c_str() );
-                    }
-                    delay(1);
-                }
-            }
-        } else {
-            ESPMan_Debugf("HTTP CODE [%d]", httpCode);
-            http.end();
-            return false;
-        }
-    } else {
-        ESPMan_Debugln("GET request Failed");
-        http.end();
-        return false;
-    }
-
-    if (files_recieved == files_expected) {
-        ESPMan_Debugf("Update Successful [%u/%u] downloaded\n", files_recieved, files_expected);
-        return true;
-    } else {
-        ESPMan_Debugf("Update Error [%u/%u] downloaded succesfully\n", files_recieved, files_expected);
-        return false;
-    }
-}
+// bool  ESPmanager::_upgrade()
+// {
+//     return false; // disable for now....
+//
+//     static const uint16_t httpPort = 80;
+//     static const size_t bufsize = 1024;
+// //  get files list into json
+//     uint8_t files_recieved = 0;
+//     uint8_t files_expected = 0;
+//
+//     HTTPClient http;
+//     String path = String(__updateserver) + String(__updatepath);
+//     http.begin(path); //HTTP
+//
+//     int httpCode = http.GET();
+//
+//     if (httpCode) {
+//         if (httpCode == 200) {
+//
+//             size_t len = http.getSize();
+//             if (len > bufsize) {
+//                 ESPMan_Debugln("Receive update length too big.  Increase buffer");
+//                 return false;
+//             }
+//             uint8_t buff[bufsize] = { 0 }; // max size of input buffer. Don't use String, as arduinoJSON doesn't like it!
+//
+//             // get tcp stream
+//             WiFiClient * stream = http.getStreamPtr();
+//
+//             // read all data from server
+//             while (http.connected() && (len > 0 || len == -1)) {
+//                 // get available data size
+//                 size_t size = stream->available();
+//
+//                 if (size) {
+//                     int c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
+//                     if (len > 0) {
+//                         len -= c;
+//                     }
+//                 }
+//                 delay(1);
+//             }
+//             http.end();
+//             yield();
+//
+//             DynamicJsonBuffer jsonBuffer;
+//             JsonArray& root = jsonBuffer.parseArray( (char*)buff );
+//
+//             if (!root.success()) {
+//                 ESPMan_Debugln("Parse JSON failed");
+//                 return false;
+//             } else {
+//                 uint8_t count = 0;
+//                 for (JsonArray::iterator it = root.begin(); it != root.end(); ++it) {
+//                     files_expected++;
+//                     JsonObject& item = *it;
+//                     const char* value = item["file"];
+//                     const char* md5 = item["md5"];
+//                     ESPMan_Debugf("[%u] ", files_expected);
+//                     String fullpathtodownload = String(__updateserver) + String(value);
+//                     String filename = fullpathtodownload.substring( fullpathtodownload.lastIndexOf("/"), fullpathtodownload.length() );
+//                     bool downloaded = _DownloadToSPIFFS(fullpathtodownload.c_str() , filename.c_str(), md5 );
+//                     if (downloaded) {
+//                         ESPMan_Debugf("Download SUCCESS (%s)\n", fullpathtodownload.c_str()  );
+//                         files_recieved++;
+//                     } else {
+//                         ESPMan_Debugf("Download FAILED (%s)\n", fullpathtodownload.c_str() );
+//                     }
+//                     delay(1);
+//                 }
+//             }
+//         } else {
+//             ESPMan_Debugf("HTTP CODE [%d]", httpCode);
+//             http.end();
+//             return false;
+//         }
+//     } else {
+//         ESPMan_Debugln("GET request Failed");
+//         http.end();
+//         return false;
+//     }
+//
+//     if (files_recieved == files_expected) {
+//         ESPMan_Debugf("Update Successful [%u/%u] downloaded\n", files_recieved, files_expected);
+//         return true;
+//     } else {
+//         ESPMan_Debugf("Update Error [%u/%u] downloaded succesfully\n", files_recieved, files_expected);
+//         return false;
+//     }
+// }
 
 bool  ESPmanager::_DownloadToSPIFFS(const char * url , const char * filename, const char * md5_true )
 {
@@ -1096,6 +1104,8 @@ void ESPmanager::upgrade(String path)
 
     JsonObject * p_root = nullptr;
     uint8_t * buff = nullptr;
+    //std::unique_ptr<uint8_t[]> buff();
+
     bool updatesketch = false;
 
     if (_parseUpdateJson(buff, jsonBuffer, p_root, path)) {
@@ -1103,7 +1113,7 @@ void ESPmanager::upgrade(String path)
         ESPMan_Debugf("[ESPmanager::_HandleSketchUpdate] _parseUpdateJson success\n");
         JsonObject & root = *p_root;
         files_expected = root["filecount"];
-        files_expected++; //  count starts at 1. 
+        files_expected++; //  count starts at 1.
         JsonArray & array = root["files"];
 
         if (root.containsKey("formatSPIFFS")) {
@@ -1164,9 +1174,9 @@ void ESPmanager::upgrade(String path)
                 DEBUG_ESP_PORT.printf("SUCCESS \n", remote_path.c_str()  );
                 //files_recieved++;
             } else {
-#if !defined(ESPMan_Debug)
+//#if !defined(ESPMan_Debug)
                 DEBUG_ESP_PORT.printf("FAILED \n", remote_path.c_str()  );
-#endif
+//#endif
             }
 #endif
 
@@ -1374,7 +1384,13 @@ bool  ESPmanager::_FilesCheck(bool startwifi)
 
 // need this.. taken out tempararily
 #ifdef USE_WEB_UPDATER
-            return _upgrade();
+            //return _upgrade();
+
+//
+//                Fix auto download....  using new upgrade method
+//
+
+
 #endif
         } else {
 
@@ -1425,7 +1441,7 @@ void  ESPmanager::InitialiseSoftAP()
         }
 
 
-        _APenabled = true;
+        _AP_is_enabled = true;
     }
 
 }
@@ -1950,7 +1966,7 @@ void  ESPmanager::_HandleDataRequest(AsyncWebServerRequest *request)
             root[F("chipid_var")] = ESP.getChipId();
             String sketchsize = formatBytes(ESP.getSketchSize()) ;//+ " ( " + String(ESP.getSketchSize()) +  " Bytes)";
             root[F("sketchsize_var")] = sketchsize;
-            root[PSTR("SketchMD5")] = ESP.getSketchMD5(); 
+            // root[PSTR("SketchMD5")] = getSketchMD5();
             String freesketchsize = formatBytes(ESP.getFreeSketchSpace()) ;//+ " ( " + String(ESP.getFreeSketchSpace()) +  " Bytes)";
             root[F("freespace_var")] = freesketchsize ;
 
@@ -2537,33 +2553,33 @@ void  ESPmanager::_HandleDataRequest(AsyncWebServerRequest *request)
         }
 // **************************
 
-#ifdef USE_WEB_UPDATER
-
-        if (plaincmd == "upgrade") {
-            static uint32_t timeout = 0;
-
-            if (millis() - timeout > 30000 || timeout == 0 ) {
-#ifdef DEBUG_ESP_PORT
-                DEBUG_ESP_PORT.println("Upgrade Started..");
-#endif
-                if (_upgrade()) {
-                    request->send(200, "SUCCESS");
-#ifdef DEBUG_ESP_PORT
-                    DEBUG_ESP_PORT.println("Download Finished.  Files Updated");
-#endif
-                    //_NewFilesCheck();
-                } else {
-                    request->send(200, "FAILED");
-#ifdef DEBUG_ESP_PORT
-                    DEBUG_ESP_PORT.println("Error.  Try Again");
-#endif
-                }
-                timeout = millis();
-                return;
-            }
-        }
-
-#endif
+// #ifdef USE_WEB_UPDATER
+//
+//         if (plaincmd == "upgrade") {
+//             static uint32_t timeout = 0;
+//
+//             if (millis() - timeout > 30000 || timeout == 0 ) {
+// #ifdef DEBUG_ESP_PORT
+//                 DEBUG_ESP_PORT.println("Upgrade Started..");
+// #endif
+//                 if (_upgrade()) {
+//                     request->send(200, "SUCCESS");
+// #ifdef DEBUG_ESP_PORT
+//                     DEBUG_ESP_PORT.println("Download Finished.  Files Updated");
+// #endif
+//                     //_NewFilesCheck();
+//                 } else {
+//                     request->send(200, "FAILED");
+// #ifdef DEBUG_ESP_PORT
+//                     DEBUG_ESP_PORT.println("Error.  Try Again");
+// #endif
+//                 }
+//                 timeout = millis();
+//                 return;
+//             }
+//         }
+//
+// #endif
 
         if (plaincmd == "deletesettings") {
 
@@ -2696,15 +2712,15 @@ uint32_t ESPmanager::trueSketchSize() {
 
     return ESP.getSketchSize();
 
-    uint32_t wrongSize = ESP.getSketchSize();
-    uint8_t buff[16] = {0};
-    ESP.flashRead(wrongSize, (uint32_t*)buff, 16);
-    uint8_t index = 0;
-    for (index = 0; index < 16; index++) {
-        if (buff[index] == 255) { break; }
-    }
-
-    return (wrongSize + index);
+    // uint32_t wrongSize = ESP.getSketchSize();
+    // uint8_t buff[16] = {0};
+    // ESP.flashRead(wrongSize, (uint32_t*)buff, 16);
+    // uint8_t index = 0;
+    // for (index = 0; index < 16; index++) {
+    //     if (buff[index] == 255) { break; }
+    // }
+    //
+    // return (wrongSize + index);
 
 }
 
@@ -2714,82 +2730,77 @@ uint32_t ESPmanager::trueSketchSize() {
 String ESPmanager::getSketchMD5()
 {
 
-    return ESP.getSketchMD5(); 
 
-    ESPMan_Debugf("[ESPmanager::getSketchMD5()] started\n");
+    return ESP.getSketchMD5();
+    //
+    // ESPMan_Debugf("[ESPmanager::getSketchMD5()] started\n");
+    //
+    // const int buf_size = 512;
+    // uint32_t offset = 0;
+    // uint32_t maxLengthLeft = trueSketchSize();
+    // uint8_t * buf = (uint8_t*) malloc(buf_size);
+    // uint8_t remainder = 0;
+    //
+    // if(!buf) {
+    //     return "MallocFail";
+    // }
+    //
+    // MD5Builder md5;
+    // md5.begin();
+    //
+    // uint32_t chunks = 0;
+    //
+    // ESPMan_Debugf(" Reading");
+    //
+    // while( maxLengthLeft > 0) {
+    //
+    //     chunks++;
+    //
+    //     size_t readBytes = maxLengthLeft;
+    //
+    //     ESPMan_Debugf(".");
+    //
+    //
+    //     if (readBytes > buf_size) {
+    //         readBytes = buf_size;
+    //     }
+    //
+    //     if (readBytes < buf_size) {
+    //
+    //         ESPMan_Debugf("\n  remainder = %u\n", readBytes);
+    //
+    //
+    //         remainder = readBytes % 4;
+    //
+    //         if (remainder) {
+    //             readBytes++;
+    //         }
+    //
+    //     }
+    //
+    //     if ( ESP.flashRead(offset, (uint32_t*)buf, readBytes) ) {
+    //         if (!remainder) {
+    //         md5.add(buf, readBytes);
+    //     } else {
+    //         md5.add(buf, readBytes + remainder);
+    //     }
+    //         offset += readBytes;
+    //         maxLengthLeft -= readBytes;
+    //
+    //     }
 
-    const int buf_size = 512;
-    uint32_t offset = 0;
-    uint32_t maxLengthLeft = trueSketchSize();
-    uint8_t * buf = (uint8_t*) malloc(buf_size);
-    uint8_t remainder = 0;
-
-    if(!buf) {
-        return "MallocFail";
-    }
-
-    MD5Builder md5;
-    md5.begin();
-
-    uint32_t chunks = 0;
-
-    ESPMan_Debugf(" Reading"); 
-
-    while( maxLengthLeft > 0) {
-
-        chunks++;
-
-        size_t readBytes = maxLengthLeft;
-
-        ESPMan_Debugf(".");
-
-
-        if (readBytes > buf_size) {
-            readBytes = buf_size;
-        }
-
-        if (readBytes < buf_size) {
-
-            ESPMan_Debugf("\n  remainder = %u\n", readBytes); 
-
-
-            remainder = readBytes % 4;
-
-            if (remainder) {
-                readBytes++; 
-            }
-            
-        }
-
-        if ( ESP.flashRead(offset, (uint32_t*)buf, readBytes) ) {
-            if (!remainder) {
-            md5.add(buf, readBytes);
-        } else {
-            md5.add(buf, readBytes + remainder);
-        }
-            offset += readBytes;
-            maxLengthLeft -= readBytes;
-
-        }
-
-    }
-
-
-
-    md5.calculate();
-
-    free(buf); 
-
-    ESPMan_Debugf(" [ESPmanager::getSketchMD5()] chunks = %u\n", chunks );
-
-    ESPMan_Debugf("[ESPmanager::getSketchMD5()] MD5 = %s\n", md5.toString().c_str() );
-
-    return md5.toString();
+    // }
+    //
+    //
+    //
+    // md5.calculate();
+    //
+    // free(buf);
+    //
+    // ESPMan_Debugf(" [ESPmanager::getSketchMD5()] chunks = %u\n", chunks );
+    //
+    // ESPMan_Debugf("[ESPmanager::getSketchMD5()] MD5 = %s\n", md5.toString().c_str() );
+    //
+    // return md5.toString();
 
 }
-
-
-
-
-
-
